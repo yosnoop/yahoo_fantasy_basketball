@@ -25,20 +25,18 @@ class Team():
         self.key = key
         self.roster = {}
         for p in roster:
-            self.add(p)
+            self.add(p['player_id'])
 
     def stat(self, category):
         return sum(getattr(player, category) for player in self.roster.values())
 
-    def drop(self, name):
-        del self.roster[name]
+    def drop(self, player_id):
+        del self.roster[player_id]
 
-    def add(self, player):
-        player_id = player['player_id']
+    def add(self, player_id):
         stats = self.league.player_stats(player_id, 'lastmonth')[0]
-        player = Player(**stats)
         print(stats['name'])
-        self.roster[stats['name']] = player
+        self.roster[player_id] = Player(**stats)
 
 
 class League():
