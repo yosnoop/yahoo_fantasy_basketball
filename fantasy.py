@@ -82,6 +82,9 @@ class League():
     def free_agents(self, position):
         return self.league.free_agents(position)
 
+    def waivers(self):
+        return self.league.waivers()
+
 
 oauth = OAuth2(None, None, from_file='oauth2.json')
 gm = yfa.Game(oauth, 'nba')
