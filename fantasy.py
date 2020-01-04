@@ -28,7 +28,7 @@ class Team():
             self.add(p['player_id'])
 
     def stat(self, category):
-        return sum(getattr(player, category) for player in self.roster.values())
+        return sum(getattr(p_, category) for p_ in self.roster.values())
 
     def drop(self, player_id):
         del self.roster[player_id]
