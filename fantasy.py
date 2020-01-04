@@ -1,9 +1,8 @@
-from dataclasses import dataclass, fields
 from yahoo_oauth import OAuth2
 from pprint import pprint
 import yahoo_fantasy_api as yfa
 
-CATEGORY = {'fg', 'ft', 'threept', 'pts', 'reb', 'ast', 'st', 'blk', 'to'}
+CATEGORY = {'FG%', 'FT%', '3PTM', 'PTS', 'REB', 'AST', 'ST', 'BLK', 'TO'}
 
 
 def to_float(value):
@@ -13,25 +12,11 @@ def to_float(value):
         return 0.0
 
 
-@dataclass
 class Player():
-    player_id: str
-    name: str
-    position_type: str
-    fg: float
-    ft: float
-    threept: float
-    pts: float
-    reb: float
-    ast: float
-    st: float
-    blk: float
-    to: float
-
-    def __post_init__(self):
-        for f in fields(self):
-            if f.type == float:
-                setattr(self, f.name, to_float(getattr(self, f.name)))
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            value = to_float(v) if k in CATEGORY else v
+            setattr(self, k, value)
 
 
 class Team():
@@ -51,7 +36,7 @@ class Team():
     def add(self, player):
         player_id = player['player_id']
         stats = self.league.player_stats(player_id, 'lastmonth')[0]
-        player = Player(*stats.values())
+        player = Player(**stats)
         print(stats['name'])
         self.roster[stats['name']] = player
 
@@ -68,7 +53,7 @@ class League():
 
     def standing(self, category: str):
         stats = {team.key: team.stat(category) for team in self.teams}
-        reverse = False if category == 'to' else True
+        reverse = False if category == 'TO' else True
         return sorted(stats.items(), key=lambda kv: kv[1], reverse=reverse)
 
     def myrank(self):
