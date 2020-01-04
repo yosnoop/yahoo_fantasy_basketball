@@ -20,12 +20,15 @@ class Player():
 
 
 class Team():
+    maximum_roster = 13
+
     def __init__(self, league, key, roster):
         self.league = league
         self.key = key
         self.roster = {}
+        self.cache = {}
         for p in roster:
-            self.add(p['player_id'])
+            self.add(p)
 
     def stat(self, category):
         return sum(getattr(p_, category) for p_ in self.roster.values())
@@ -33,10 +36,20 @@ class Team():
     def drop(self, player_id):
         del self.roster[player_id]
 
-    def add(self, player_id):
-        stats = self.league.player_stats(player_id, 'lastmonth')[0]
-        print(stats['name'])
-        self.roster[player_id] = Player(**stats)
+    def add(self, player):
+        if len(self.roster) >= Team.maximum_roster:
+            raise ValueError('Cannot add. Roster is full.')
+        player_id = player['player_id']
+        cached = self.cache.get(player_id)
+        if cached:
+            self.roster[player_id] = cached
+        else:
+            stats = self.league.player_stats(player_id, 'lastmonth')[0]
+            stats.update({'eligible_positions': player['eligible_positions']})
+            newplayer = Player(**stats)
+            self.roster[player_id] = newplayer
+            self.cache[player_id] = newplayer
+        # print(self.roster[player_id].name)
 
 
 class League():
