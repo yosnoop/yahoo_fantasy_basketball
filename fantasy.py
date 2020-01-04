@@ -90,9 +90,8 @@ lg = League(gm)
 current_avgrank = sum(lg.myrank().values()) / len(CATEGORY)
 print("Current my ranks: " + str(lg.myrank()))
 print("Current my average rank: {:.3f}".format(current_avgrank))
-recommendation = {}
+recommendation = []
 for position in ['PG', 'SG', 'SF', 'PF', 'C']:
-    recommendation[position] = []
     for free_agent in lg.free_agents(position):
         sleep(1)
         for player_id, player in lg.my_team.roster.copy().items():
@@ -105,8 +104,13 @@ for position in ['PG', 'SG', 'SF', 'PF', 'C']:
             if delta > 0:
                 print("Ranks: " + str(lg.myrank()))
                 print("Average rank: {:.3f}".format(avgrank))
-                recommendation[position].append(
-                    (free_agent, delta, player.name)
+                recommendation.append(
+                    (free_agent, delta, player.player_id)
                 )
             lg.my_team.drop(free_agent['player_id'])
             lg.my_team.roster[player_id] = player
+
+if len(recommendation) > 0:
+    topprospect = sorted(recommendation, key=lambda x: x[1], reverse=True)[0]
+    pprint(topprospect)
+    lg.my_team.add_and_drop_player(topprospect[0]['player_id'], topprospect[2])
