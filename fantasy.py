@@ -98,6 +98,8 @@ for position in ['PG', 'SG', 'SF', 'PF', 'C']:
     for free_agent in lg.free_agents(position):
         sleep(1)
         for player_id, player in lg.my_team.roster.copy().items():
+            if player_id in [4901, 5007]:
+                continue
             if position not in player.eligible_positions:
                 continue
             lg.my_team.drop(player_id)
