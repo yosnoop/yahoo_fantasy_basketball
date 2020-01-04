@@ -44,11 +44,14 @@ class Team():
 class League():
     def __init__(self, game):
         league = game.to_league(game.league_ids()[-1])
-        self.my_team_key = league.team_key()
-        self.teams = [
-            Team(league, t['team_key'], league.to_team(t['team_key']).roster())
-            for t in league.teams()
-        ]
+        self.teams = []
+        self.my_team = None
+        for team in league.teams():
+            team_key = team['team_key']
+            t = Team(league, team_key, league.to_team(team_key).roster())
+            if self.my_team is None and team_key == league.team_key():
+                self.my_team = t
+            self.teams.append(t)
         self.league = league
 
     def standing(self, category: str):
