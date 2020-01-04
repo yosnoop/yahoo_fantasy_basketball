@@ -75,7 +75,7 @@ class League():
         result = {}
         for cat in CATEGORY:
             for i, stat in enumerate(self.standing(cat)):
-                if stat[0] == self.my_team['team_key']:
+                if stat[0] == self.my_team.key:
                     result[cat] = i
         return result
 
