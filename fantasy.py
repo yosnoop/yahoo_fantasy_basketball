@@ -57,12 +57,12 @@ class League():
         return sorted(stats.items(), key=lambda kv: kv[1], reverse=reverse)
 
     def myrank(self):
-        ranks = 0
+        result = {}
         for cat in CATEGORY:
             for i, stat in enumerate(self.standing(cat)):
-                if stat[0] == self.my_team_key:
-                    ranks += i
-        return ranks / len(CATEGORY)
+                if stat[0] == self.my_team['team_key']:
+                    result[cat] = i
+        return result
 
     def free_agents(self, position):
         return self.league.free_agents(position)
