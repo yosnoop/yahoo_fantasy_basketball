@@ -1,6 +1,7 @@
 from yahoo_oauth import OAuth2
 from pprint import pprint
 import yahoo_fantasy_api as yfa
+from time import sleep
 
 CATEGORY = {'FG%', 'FT%', '3PTM', 'PTS', 'REB', 'AST', 'ST', 'BLK', 'TO'}
 
@@ -86,5 +87,26 @@ oauth = OAuth2(None, None, from_file='oauth2.json')
 gm = yfa.Game(oauth, 'nba')
 lg = League(gm)
 
+current_avgrank = sum(lg.myrank().values()) / len(CATEGORY)
+print("Current my ranks: " + str(lg.myrank()))
+print("Current my average rank: {:.3f}".format(current_avgrank))
+recommendation = {}
 for position in ['PG', 'SG', 'SF', 'PF', 'C']:
-    pprint(lg.free_agents(position))
+    recommendation[position] = []
+    for free_agent in lg.free_agents(position):
+        sleep(1)
+        for player_id, player in lg.my_team.roster.copy().items():
+            if position not in player.eligible_positions:
+                continue
+            lg.my_team.drop(player_id)
+            lg.my_team.add(free_agent)
+            avgrank = sum(lg.myrank().values()) / len(CATEGORY)
+            delta = current_avgrank - avgrank
+            if delta > 0:
+                print("Ranks: " + str(lg.myrank()))
+                print("Average rank: {:.3f}".format(avgrank))
+                recommendation[position].append(
+                    (free_agent, delta, player.name)
+                )
+            lg.my_team.drop(free_agent['player_id'])
+            lg.my_team.roster[player_id] = player
