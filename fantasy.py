@@ -118,4 +118,7 @@ for position in ['PG', 'SG', 'SF', 'PF', 'C']:
 if len(recommendation) > 0:
     topprospect = sorted(recommendation, key=lambda x: x[1], reverse=True)[0]
     pprint(topprospect)
-    lg.my_team.add_and_drop_player(topprospect[0]['player_id'], topprospect[2])
+    lg.league.to_team(lg.my_team.key).add_and_drop_players(
+        topprospect[0]['player_id'],
+        topprospect[2]
+    )
