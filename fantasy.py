@@ -81,13 +81,16 @@ class League():
                     result[cat] = i
         return result
 
-    def find_prospects(self, list_):
+    def find_prospects(self, list_, position=None):
         result = []
         current_avgrank = sum(self.myrank().values()) / len(CATEGORY)
         for candidate in list_:
             sleep(1)
             for player_id, player in self.my_team.roster.copy().items():
                 if player_id in League.non_tradable:
+                    continue
+                if position is not None and \
+                        position not in player.eligible_positions:
                     continue
                 self.my_team.drop(player_id)
                 self.my_team.add(candidate)
@@ -108,7 +111,10 @@ class League():
         recommendation.extend(self.find_prospects(self.league.waivers()))
         for position in ['PG', 'SG', 'SF', 'PF', 'C']:
             recommendation.extend(
-                self.find_prospects(self.league.free_agents(position))
+                self.find_prospects(
+                    self.league.free_agents(position),
+                    position
+                )
             )
         return recommendation
 
