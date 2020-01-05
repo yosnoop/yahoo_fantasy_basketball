@@ -90,6 +90,15 @@ class League():
             for player_id, player in self.my_team.roster.copy().items():
                 if player_id in League.non_tradable:
                     continue
+                if position is None:
+                    common_positions = \
+                        list(
+                            set(player.eligible_positions).intersection(
+                                candidate['eligible_positions']
+                            )
+                        )
+                    if len(common_positions) >= len(['Util']):
+                        continue
                 if position is not None and \
                         position not in player.eligible_positions:
                     continue
