@@ -94,11 +94,31 @@ current_avgrank = sum(lg.myrank().values()) / len(CATEGORY)
 print("Current my ranks: " + str(lg.myrank()))
 print("Current my average rank: {:.3f}".format(current_avgrank))
 recommendation = []
+non_tradable = [4901, 5007, 5256]
+
+for waiver in lg.waivers():
+    sleep(1)
+    for player_id, player in lg.my_team.roster.copy().items():
+        if player_id in non_tradable:
+            continue
+        lg.my_team.drop(player_id)
+        lg.my_team.add(waiver)
+        avgrank = sum(lg.myrank().values()) / len(CATEGORY)
+        delta = current_avgrank - avgrank
+        if delta > 0:
+            print("Ranks: " + str(lg.myrank()))
+            print("Average rank: {:.3f}".format(avgrank))
+            recommendation.append(
+                (waiver, delta, player.player_id)
+            )
+        lg.my_team.drop(waiver['player_id'])
+        lg.my_team.roster[player_id] = player
+
 for position in ['PG', 'SG', 'SF', 'PF', 'C']:
     for free_agent in lg.free_agents(position):
         sleep(1)
         for player_id, player in lg.my_team.roster.copy().items():
-            if player_id in [4901, 5007]:
+            if player_id in non_tradable:
                 continue
             if position not in player.eligible_positions:
                 continue
