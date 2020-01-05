@@ -54,6 +54,8 @@ class Team():
 
 
 class League():
+    non_tradable = [4901, 5007, 5256]
+
     def __init__(self, game):
         league = game.to_league(game.league_ids()[-1])
         self.teams = []
@@ -79,66 +81,50 @@ class League():
                     result[cat] = i
         return result
 
-    def free_agents(self, position):
-        return self.league.free_agents(position)
+    def find_prospects(self, list_):
+        result = []
+        current_avgrank = sum(self.myrank().values()) / len(CATEGORY)
+        for candidate in list_:
+            sleep(1)
+            for player_id, player in self.my_team.roster.copy().items():
+                if player_id in League.non_tradable:
+                    continue
+                self.my_team.drop(player_id)
+                self.my_team.add(candidate)
+                avgrank = sum(self.myrank().values()) / len(CATEGORY)
+                delta = current_avgrank - avgrank
+                if delta > 0:
+                    print("Ranks: " + str(self.myrank()))
+                    print("Average rank: {:.3f}".format(avgrank))
+                    result.append(
+                        (candidate, delta, player.player_id)
+                    )
+                self.my_team.drop(candidate['player_id'])
+                self.my_team.roster[player_id] = player
+        return result
 
-    def waivers(self):
-        return self.league.waivers()
+    def recommend(self):
+        recommendation = []
+        recommendation.extend(self.find_prospects(self.league.waivers()))
+        for position in ['PG', 'SG', 'SF', 'PF', 'C']:
+            recommendation.extend(
+                self.find_prospects(self.league.free_agents(position))
+            )
+        return recommendation
+
+    def add_and_drop(self):
+        recommendation = self.recommend()
+        if len(recommendation) == 0:
+            return
+        top = sorted(recommendation, key=lambda x: x[1], reverse=True)[0]
+        pprint(top)
+        self.league.to_team(self.my_team.key).add_and_drop_players(
+            top[0]['player_id'],
+            top[2]
+        )
 
 
 oauth = OAuth2(None, None, from_file='oauth2.json')
 gm = yfa.Game(oauth, 'nba')
 lg = League(gm)
-
-current_avgrank = sum(lg.myrank().values()) / len(CATEGORY)
-print("Current my ranks: " + str(lg.myrank()))
-print("Current my average rank: {:.3f}".format(current_avgrank))
-recommendation = []
-non_tradable = [4901, 5007, 5256]
-
-for waiver in lg.waivers():
-    sleep(1)
-    for player_id, player in lg.my_team.roster.copy().items():
-        if player_id in non_tradable:
-            continue
-        lg.my_team.drop(player_id)
-        lg.my_team.add(waiver)
-        avgrank = sum(lg.myrank().values()) / len(CATEGORY)
-        delta = current_avgrank - avgrank
-        if delta > 0:
-            print("Ranks: " + str(lg.myrank()))
-            print("Average rank: {:.3f}".format(avgrank))
-            recommendation.append(
-                (waiver, delta, player.player_id)
-            )
-        lg.my_team.drop(waiver['player_id'])
-        lg.my_team.roster[player_id] = player
-
-for position in ['PG', 'SG', 'SF', 'PF', 'C']:
-    for free_agent in lg.free_agents(position):
-        sleep(1)
-        for player_id, player in lg.my_team.roster.copy().items():
-            if player_id in non_tradable:
-                continue
-            if position not in player.eligible_positions:
-                continue
-            lg.my_team.drop(player_id)
-            lg.my_team.add(free_agent)
-            avgrank = sum(lg.myrank().values()) / len(CATEGORY)
-            delta = current_avgrank - avgrank
-            if delta > 0:
-                print("Ranks: " + str(lg.myrank()))
-                print("Average rank: {:.3f}".format(avgrank))
-                recommendation.append(
-                    (free_agent, delta, player.player_id)
-                )
-            lg.my_team.drop(free_agent['player_id'])
-            lg.my_team.roster[player_id] = player
-
-if len(recommendation) > 0:
-    topprospect = sorted(recommendation, key=lambda x: x[1], reverse=True)[0]
-    pprint(topprospect)
-    lg.league.to_team(lg.my_team.key).add_and_drop_players(
-        topprospect[0]['player_id'],
-        topprospect[2]
-    )
+lg.add_and_drop()
