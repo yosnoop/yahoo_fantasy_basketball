@@ -50,7 +50,7 @@ class Team():
             newplayer = Player(**stats)
             self.roster[player_id] = newplayer
             self.cache[player_id] = newplayer
-        print(self.roster[player_id].name)
+            print(self.roster[player_id].name)
 
 
 class League():
