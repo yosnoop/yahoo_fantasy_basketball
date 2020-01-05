@@ -88,6 +88,8 @@ class League():
         for candidate in list_:
             sleep(1)
             for player_id, player in self.my_team.roster.copy().items():
+                if candidate['status'] != '':
+                    continue
                 if player_id in League.non_tradable:
                     continue
                 if position is None:
