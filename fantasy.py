@@ -54,6 +54,7 @@ class Team():
 
 
 class League():
+    positions = ['PG', 'SG', 'SF', 'PF', 'C']
     non_tradable = [4901, 5007, 5256]
 
     def __init__(self, game):
@@ -109,7 +110,7 @@ class League():
     def recommend(self):
         recommendation = []
         recommendation.extend(self.find_prospects(self.league.waivers()))
-        for position in ['PG', 'SG', 'SF', 'PF', 'C']:
+        for position in League.positions:
             recommendation.extend(
                 self.find_prospects(
                     self.league.free_agents(position),
