@@ -136,6 +136,9 @@ class League():
             return
         top = sorted(recommendation, key=lambda x: x[1], reverse=True)[0]
         pprint(top)
+        if top[1] < 0.7:
+            print(f"The delta ({top[1]}) is too small to make the change")
+            return
         self.league.to_team(self.my_team.key).add_and_drop_players(
             top[0]['player_id'],
             top[2]
