@@ -55,7 +55,7 @@ class Team():
 
 class League():
     positions = ['PG', 'SG', 'SF', 'PF', 'C']
-    non_tradable = [4901, 5007, 5256]
+    non_tradable = [4901, 5007, 5256, 4247]
 
     def __init__(self, game):
         league = game.to_league(game.league_ids()[-1])
