@@ -2,6 +2,8 @@ from yahoo_oauth import OAuth2
 from pprint import pprint
 import yahoo_fantasy_api as yfa
 from time import sleep
+from datetime import date, timedelta
+
 
 CATEGORY = {'FG%', 'FT%', '3PTM', 'PTS', 'REB', 'AST', 'ST', 'BLK', 'TO'}
 
@@ -61,9 +63,15 @@ class League():
         league = game.to_league(game.league_ids()[-1])
         self.teams = []
         self.my_team = None
+        tmr = date.today() - timedelta(days=1)
+
         for team in league.teams():
             team_key = team['team_key']
-            t = Team(league, team_key, league.to_team(team_key).roster())
+            t = Team(
+                league,
+                team_key,
+                league.to_team(team_key).roster(day=tmr)
+            )
             if self.my_team is None and team_key == league.team_key():
                 self.my_team = t
             self.teams.append(t)
