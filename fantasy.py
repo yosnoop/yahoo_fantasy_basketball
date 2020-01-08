@@ -63,7 +63,7 @@ class League():
         league = game.to_league(game.league_ids()[-1])
         self.teams = []
         self.my_team = None
-        tmr = date.today() - timedelta(days=1)
+        tmr = date.today() + timedelta(days=1)
 
         for team in league.teams():
             team_key = team['team_key']
