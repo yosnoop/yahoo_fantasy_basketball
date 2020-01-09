@@ -15,13 +15,6 @@ def to_float(value):
         return 0.0
 
 
-class Player():
-    def __init__(self, **kwargs):
-        for k, v in kwargs.items():
-            value = to_float(v) if k in CATEGORY else v
-            setattr(self, k, value)
-
-
 class Team():
     maximum_roster = 13
 
@@ -34,7 +27,7 @@ class Team():
             self.add(p)
 
     def stat(self, category):
-        return sum(getattr(p_, category) for p_ in self.roster.values())
+        return sum(to_float(p_[category]) for p_ in self.roster.values())
 
     def drop(self, player_id):
         del self.roster[player_id]
@@ -49,10 +42,9 @@ class Team():
         else:
             stats = self.league.player_stats(player_id, 'lastmonth')[0]
             stats.update({'eligible_positions': player['eligible_positions']})
-            newplayer = Player(**stats)
-            self.roster[player_id] = newplayer
-            self.cache[player_id] = newplayer
-            print(self.roster[player_id].name)
+            self.roster[player_id] = stats
+            self.cache[player_id] = stats
+            print(self.roster[player_id]['name'])
 
 
 class League():
@@ -103,14 +95,14 @@ class League():
                 if position is None:
                     common_positions = \
                         list(
-                            set(player.eligible_positions).intersection(
+                            set(player['eligible_positions']).intersection(
                                 candidate['eligible_positions']
                             )
                         )
                     if len(common_positions) >= len(['Util']):
                         continue
                 if position is not None and \
-                        position not in player.eligible_positions:
+                        position not in player['eligible_positions']:
                     continue
                 self.my_team.drop(player_id)
                 self.my_team.add(candidate)
@@ -120,7 +112,7 @@ class League():
                     print("Ranks: " + str(self.myrank()))
                     print("Average rank: {:.3f}".format(avgrank))
                     result.append(
-                        (candidate, delta, player.player_id)
+                        (candidate, delta, player['player_id'])
                     )
                 self.my_team.drop(candidate['player_id'])
                 self.my_team.roster[player_id] = player
