@@ -5,9 +5,6 @@ from time import sleep
 from datetime import date, timedelta
 
 
-CATEGORY = {'FG%', 'FT%', '3PTM', 'PTS', 'REB', 'AST', 'ST', 'BLK', 'TO'}
-
-
 def to_float(value):
     try:
         return float(value)
@@ -53,6 +50,8 @@ class League():
 
     def __init__(self, game):
         league = game.to_league(game.league_ids()[-1])
+        self.category = \
+            list(map(lambda x: x['display_name'], league.stat_categories()))
         self.teams = []
         self.my_team = None
         tmr = date.today() + timedelta(days=1)
@@ -76,7 +75,7 @@ class League():
 
     def myrank(self):
         result = {}
-        for cat in CATEGORY:
+        for cat in self.category:
             for i, stat in enumerate(self.standing(cat)):
                 if stat[0] == self.my_team.key:
                     result[cat] = i
@@ -84,7 +83,7 @@ class League():
 
     def find_prospects(self, list_, position=None):
         result = []
-        current_avgrank = sum(self.myrank().values()) / len(CATEGORY)
+        current_avgrank = sum(self.myrank().values()) / len(self.category)
         for candidate in list_:
             sleep(1)
             for player_id, player in self.my_team.roster.copy().items():
@@ -106,7 +105,7 @@ class League():
                     continue
                 self.my_team.drop(player_id)
                 self.my_team.add(candidate)
-                avgrank = sum(self.myrank().values()) / len(CATEGORY)
+                avgrank = sum(self.myrank().values()) / len(self.category)
                 delta = current_avgrank - avgrank
                 if delta > 0:
                     print("Ranks: " + str(self.myrank()))
