@@ -131,7 +131,7 @@ class League():
 
     def add_and_drop(self):
         recommendation = self.recommend()
-        if len(recommendation) == 0:
+        if not recommendation:
             return
         top = sorted(recommendation, key=lambda x: x[1], reverse=True)[0]
         pprint(top)
